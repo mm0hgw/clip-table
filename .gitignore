@@ -3,3 +3,6 @@ clip-table/cliptable.code-workspace
 clip-table/.DS_Store
 clip-table/admin/.DS_Store
 .DS_Store
+
+*/wp-config.php
+
