@@ -302,7 +302,7 @@ function cliptable_show_table($atts) {
 
     echo "</tbody></table></div>";
  			
- 	$final_table = ob_get_clean(); //gets all echo values since start
+ 	  $final_table = ob_get_clean(); //gets all echo values since start
 
    //load copy script to activate copy button listners
    wp_enqueue_script(
