@@ -98,6 +98,8 @@ function crudAdminPage() {
   global $wpdb;
   $table_name ='cliptable';
 
+
+  //TODO - Move crud actions
   //INSERT New Entry
 
   if (isset($_POST['newsubmit'])) {
