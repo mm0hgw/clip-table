@@ -29,8 +29,9 @@ function enqueue_my_scripts() {
 
   $src = plugin_dir_url(__FILE__) . 'js/copy.js'; //TODO replace in query so not hard coded below
 
-  error_log( 'CLIPTABLE PLUGIN  - Enqueue gScripts '.$src);
+  error_log( 'CLIPTABLE PLUGIN  - Enqueue Scripts '.$src);
   wp_enqueue_script( 'jquery' );
+  wp_enqueue_style( 'load-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css' );
 
   //wp_enqueue_script('copy_js', plugin_dir_url(__FILE__) . 'js/copy.js'); //standard way to enqueue
 
@@ -167,24 +168,27 @@ function crudAdminPage() {
 }
 
 function updateRecord($table_name){
-  $table_name = $tablename;
+  global $wpdb;
+  $table_name = $table_name;
+
 
   //Get details for item to update
-  $upt_id = $_GET['upt'];
-    $result = $wpdb->get_results("SELECT * FROM $table_name WHERE id='$upt_id'");
-    foreach($result as $print) {
-      $title = $print->Title;
-      $descr = $print->Description;
-      $details = $print->Details;
-      error_log( 'CLIPTABLE PLUGIN - Update New Entry '. $title.' '.$descr.' '.$details);
-    }
+$upt_id = $_GET['upt'];
+  $result = $wpdb->get_results("SELECT * FROM $table_name WHERE id='$upt_id'");
+  foreach($result as $print) {
+    $title = $print->Title;
+    $descr = $print->Description;
+    $details = $print->Details;
+    error_log( 'CLIPTABLE PLUGIN - Update New Entry '. $title.' '.$descr.' '.$details);
+  }
    ?>
     <br/><br/>
 
     <!-- Display row to edit -->
     <h2> Update Record</h2>
     <table class='wp-list-table widefat striped'>
-      tableHeaders();
+      <? tableHeaders(); 
+      echo "
       <tbody>
         <form action='' method='post'>
           <tr>
@@ -197,7 +201,8 @@ function updateRecord($table_name){
         </form>
       </tbody>
     </table>
-    <?
+    ";
+    
 }
 function tableHeaders(){
   ?>
@@ -304,16 +309,9 @@ function cliptable_show_table($atts) {
 
     echo "</tbody></table></div>";
  			
- 	  $final_table = ob_get_clean(); //gets all echo values since start
+  $final_table = ob_get_clean(); //gets all echo values since start
 
-   //load copy script to activate copy button listners
-   wp_enqueue_script(
-    'copy_js',
-    plugin_dir_url(__FILE__) . 'js/copy.js',
-    array('jquery'), // this script depends on jQuery
-    filemtime(plugin_dir_url(__FILE__) . 'js/copy.js'), // uses file modified date 
-    true // true = in Footer - load after page - e.g. for eventlistners
-  );
+  enqueue_my_scripts();
  	
  	return $final_table ;
 }
