@@ -7,7 +7,7 @@ Plugin Name: Clip-Table
 Plugin URI: 
  
 Description: Plugin to show custom table with a field being added to a copy to clipboard button. 
-Admin Page allows create, delete and update and copy. Short Code just shows table with copy button.
+Admin Page allows create, delete and update and copy. Short Code shows table with copy button.
  
 Version: 1.0
  
@@ -27,16 +27,16 @@ Text Domain: cliptable
 function enqueue_my_scripts() {
   error_log( 'CLIPTABLE PLUGIN  - Enqueue Scripts ');
 
-  $src = plugin_dir_url(__FILE__) . 'js/copy.js'; //TODO replace in query so not hard coded below
-
-  error_log( 'CLIPTABLE PLUGIN  - Enqueue Scripts '.$src);
   wp_enqueue_script( 'jquery' );
+  //Font Awesome Style to show Action Button images
   wp_enqueue_style( 'load-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css' );
+  
+  //Admin Stylesheet 
+  wp_enqueue_style('admin_css', plugin_dir_url(__FILE__).'admin/css/admin.css');
 
   //wp_enqueue_script('copy_js', plugin_dir_url(__FILE__) . 'js/copy.js'); //standard way to enqueue
 
-  //Loads in footer - for Event listeners
-  //Loads latest file - always runs latest version 
+  //Copy script for Copy to Clipboard Button Loads in footer - for Event listeners. Loads latest file - always runs latest version 
   wp_enqueue_script(
     'copy_js',
     plugin_dir_url(__FILE__) . 'js/copy.js',
@@ -45,7 +45,7 @@ function enqueue_my_scripts() {
     true // true = in Footer - load after page - e.g. for eventlistners
   );
 }
-add_action('admin_enqueue_scripts', 'enqueue_my_scripts');  //wp_enqueue_scripts for front end
+add_action('admin_enqueue_scripts', 'enqueue_my_scripts'); 
 
 
 // Create Table in Database on Plugin Activation
@@ -54,7 +54,7 @@ register_activation_hook( __FILE__, 'crudOperationsTable');
 
 function crudOperationsTable() {
   
-  //CREATE TABLE ON ACTIVATION
+    //CREATE TABLE ON ACTIVATION
     global $wpdb; //The wordpress Database
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php'); //makes dbDelta work
 
@@ -73,28 +73,20 @@ function crudOperationsTable() {
         ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
         ";
 
+    //Output SQL to allow for debuggin
     error_log( 'CLIPTABLE PLUGIN - Creation SQL ' );
     error_log( print_r( $sql, true ) );
   
     //Run Create Statement, If Table Doesn't exist 
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) 
-     {
-      
+     { 
       dbDelta($sql);
-      error_log( 'CLIPTABLE PLUGIN  - Database Created ' );
-         
+      error_log( 'CLIPTABLE PLUGIN  - Database Created ' );   
      }
 }
 
-// Admin Page Creation
-add_action('admin_menu', 'addAdminPageContent');
 
-// Add Admin Page to Admin Menu List
-function addAdminPageContent() {
-  add_menu_page('Clip Table', 'Clip Table', 'manage_options', __FILE__, 'crudAdminPage', 'dashicons-wordpress');
-}
-
-//Admin Page - Note TABLE NAME
+//Admin Page
 function crudAdminPage() {
   global $wpdb;
   $table_name ='cliptable';
@@ -163,17 +155,27 @@ function crudAdminPage() {
   <!-- If Updating - Show editable row for item -->
   <?php
   if (isset($_GET['upt'])) {
-    updateRecord($table_name);
+    updateRecordForm($table_name);
   }
 }
 
-function updateRecord($table_name){
+
+// Admin Page Creation
+add_action('admin_menu', 'addAdminPageContent');
+
+// Add Admin Page to Admin Menu List
+function addAdminPageContent() {
+  add_menu_page('Clip Table', 'Clip Table', 'manage_options', __FILE__, 'crudAdminPage', 'dashicons-wordpress');
+}
+
+
+function updateRecordForm($table_name){
   global $wpdb;
   $table_name = $table_name;
 
 
   //Get details for item to update
-$upt_id = $_GET['upt'];
+  $upt_id = $_GET['upt'];
   $result = $wpdb->get_results("SELECT * FROM $table_name WHERE id='$upt_id'");
   foreach($result as $print) {
     $title = $print->Title;
@@ -182,37 +184,44 @@ $upt_id = $_GET['upt'];
     error_log( 'CLIPTABLE PLUGIN - Update New Entry '. $title.' '.$descr.' '.$details);
   }
    ?>
-    <br/><br/>
 
-    <!-- Display row to edit -->
-    <h2> Update Record</h2>
-    <table class='wp-list-table widefat striped'>
-      <? tableHeaders(); 
-      echo "
-      <tbody>
-        <form action='' method='post'>
-          <tr>
-            <td width=5%'>$print->id <input type='hidden' id='uptid' name='uptid' value='$print->id'></td>
-            <td width='25%'><input type='text' id='uptTitle' name='uptTitle' value='$print->Title'></td>
-            <td width='25%'><input type='text' id='uptDesc' name='uptDesc' value='$print->Description'></td>
-            <td width='25%'><input type='text' id='uptDetails' name='uptDetails' value='$print->Details'></td>
-            <td width='15%'><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=clip-table%2Fclip-table.php'><button type='button'>CANCEL</button></a></td>
-          </tr>
-        </form>
-      </tbody>
-    </table>
-    ";
-    
+  <!-- Display table of row to edit -->
+  <br/><br/>
+  <h2> Update Record</h2>
+  <table class='wp-list-table widefat striped'>
+    <? 
+      tableHeaders(); 
+      updateform($print);
+    ?>
+  </table>
+  <?
+}
+
+function updateform($print){
+  $print = $print;
+  echo "
+    <tbody>
+      <form action='' method='post'>
+        <tr>
+          <td>$print->id<input type='hidden' id='uptid' name='uptid' value='$print->id'></td><!--uneditable-->
+          <td><input type='text' id='uptTitle' name='uptTitle' value='$print->Title'></td>
+          <td><input type='text' id='uptDesc' name='uptDesc' value='$print->Description'></td>
+          <td><input type='text' id='uptDetails' name='uptDetails' value='$print->Details'></td>
+          <td><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=clip-table%2Fclip-table.php'><button type='button'>CANCEL</button></a></td>
+        </tr>
+      </form>
+    </tbody>
+ ";
 }
 function tableHeaders(){
   ?>
   <thead>
       <tr>
-        <th width='5%'>ID</th>
-        <th width='25%'>Title</th>
-        <th width='25%'>Description </th>
-        <th width='25%'>Details</th>
-        <th width='15%'>Actions</th>
+        <th class='ct_column-id'>ID</th>
+        <th class='ct_column-title'>Title</th>
+        <th class='ct_column-desc'>Description </th>
+        <th class='ct_column-copy'>Details</th>
+        <th>Actions</th>
       </tr>
     </thead>
   <?
@@ -241,10 +250,11 @@ function showAllRecordsAdmin($table_name)
   foreach ($result as $print) {
     echo "
       <tr>
-        <td width='5%'>$print->id</td>
-        <td width='25%'>$print->Title</td>
-        <td width='25%'>$print->Description</td>
-        <td width='25%'id='copyItem-$print->id'>$print->Details</td>
+      <!-- ID in TD for item to be put in clipboard -->
+        <td>$print->id</td>
+        <td>$print->Title</td>
+        <td>$print->Description</td>
+        <td id='copyItem-$print->id'>$print->Details</td> 
 
         <!--Button Actions -->
 
