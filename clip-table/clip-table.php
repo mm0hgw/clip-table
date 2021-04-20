@@ -28,9 +28,15 @@ function enqueue_my_scripts() {
   error_log( 'CLIPTABLE PLUGIN  - Enqueue Scripts ');
 
   wp_enqueue_script( 'jquery' );
+  // wp_enqueue_script( 'typedJS', 'https://pro.crunchify.com/typed.min.js', array('jquery') );
+
   //Font Awesome Style to show Action Button images
   wp_enqueue_style( 'load-fa', 'https://use.fontawesome.com/releases/v5.5.0/css/all.css' );
   
+  //Bootstrap
+  wp_enqueue_style( 'Bootstrap_css','https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css' );
+  wp_enqueue_script( 'Bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js', array(), '1.0.0', true );
+
   //Admin Stylesheet 
   wp_enqueue_style('admin_css', plugin_dir_url(__FILE__).'admin/css/admin.css');
 
@@ -109,20 +115,8 @@ function crudAdminPage() {
     echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
   }
 
-  //UPDATE Entry 
-
-  if (isset($_POST['uptsubmit'])) {
-    $id = $_POST['uptid'];
-    $title = $_POST['uptTitle'];
-    $desc = $_POST['uptDesc'];
-    $details = $_POST['uptDetails'];
-
-    error_log( 'CLIPTABLE PLUGIN  - UPDATE Entry: '.$id);
-
-    $wpdb->query("UPDATE $table_name SET Title='$title',Description='$desc',Details='$details'  WHERE id='$id'");
-    
-    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
-  }
+  //UPDATE Entry based on POST/GET
+  performUpdate();
 
   //DELETE Entry
 
@@ -155,10 +149,11 @@ function crudAdminPage() {
   <!-- If Updating - Show editable row for item -->
   <?php
   if (isset($_GET['upt'])) {
-    updateRecordForm($table_name);
+    updateRecordForm();
   }
-}
+  assignItemModal();
 
+}
 
 // Admin Page Creation
 add_action('admin_menu', 'addAdminPageContent');
@@ -168,51 +163,173 @@ function addAdminPageContent() {
   add_menu_page('Clip Table', 'Clip Table', 'manage_options', __FILE__, 'crudAdminPage', 'dashicons-wordpress');
 }
 
+function performUpdate(){
+    //UPDATE Entry in DB from POST and reload page
 
-function updateRecordForm($table_name){
-  global $wpdb;
-  $table_name = $table_name;
+    //Add OR Request from Modal 
 
+  if (isset($_POST['uptsubmit'])) {
+    $id = $_POST['uptid'];
+    $title = $_POST['uptTitle'];
+    $desc = $_POST['uptDesc'];
+    $details = $_POST['uptDetails'];
+
+    error_log( 'CLIPTABLE PLUGIN  - UPDATE Entry: '.$id);
+
+    $wpdb->query("UPDATE $table_name SET Title='$title',Description='$desc',Details='$details'  WHERE id='$id'");
+    
+    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
+  }
+}
+
+function updateRecordForm(){
+
+  //Show form based on POST/GET inline on page
 
   //Get details for item to update
-  $upt_id = $_GET['upt'];
-  $result = $wpdb->get_results("SELECT * FROM $table_name WHERE id='$upt_id'");
-  foreach($result as $print) {
-    $title = $print->Title;
-    $descr = $print->Description;
-    $details = $print->Details;
-    error_log( 'CLIPTABLE PLUGIN - Update New Entry '. $title.' '.$descr.' '.$details);
-  }
-   ?>
-
+  $id = $_GET['upt'];
+  $row = getItemByID($id);
+  ?>
   <!-- Display table of row to edit -->
   <br/><br/>
   <h2> Update Record</h2>
   <table class='wp-list-table widefat striped'>
     <? 
       tableHeaders(); 
-      updateform($print);
+      updateForm($row);
     ?>
   </table>
   <?
 }
 
-function updateform($print){
-  $print = $print;
+function getItemByID($id)
+{
+  global $wpdb;
+  $table_name = "cliptable";
+  $id = $id;
+  console.log("getItemByID id: "+$id );
+
+  $results = $wpdb->get_results("SELECT * FROM $table_name WHERE id='$id'");
+
+  foreach($results as $row) {
+    $title = $row->Title;
+    $descr = $row->Description;
+    $details = $row->Details;
+  }
+  return $row;
+}
+
+function updateForm($row){
+  $row = $row;
   echo "
     <tbody>
       <form action='' method='post'>
         <tr>
-          <td>$print->id<input type='hidden' id='uptid' name='uptid' value='$print->id'></td><!--uneditable-->
-          <td><input type='text' id='uptTitle' name='uptTitle' value='$print->Title'></td>
-          <td><input type='text' id='uptDesc' name='uptDesc' value='$print->Description'></td>
-          <td><input type='text' id='uptDetails' name='uptDetails' value='$print->Details'></td>
+          <td>$row->id<input type='hidden' id='uptid' name='uptid' value='$row->id'></td><!--uneditable-->
+          <td><input type='text' id='uptTitle' name='uptTitle' value='$row->Title'></td>
+          <td><input type='text' id='uptDesc' name='uptDesc' value='$row->Description'></td>
+          <td><input type='text' id='uptDetails' name='uptDetails' value='$row->Details'></td>
           <td><button id='uptsubmit' name='uptsubmit' type='submit'>UPDATE</button> <a href='admin.php?page=clip-table%2Fclip-table.php'><button type='button'>CANCEL</button></a></td>
         </tr>
       </form>
     </tbody>
  ";
 }
+
+function assignItemModal()
+{
+    echo '
+  <div id="modal" class="modal" role="dialog" aria-labelledby="Edit Window" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-header">
+      <h1 class="modal-title"></h1>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+      <div id="modal_target" class="modal-content">
+
+      </div>
+    </div>
+  </div>';
+    itemModalListen();
+}
+
+function itemModalListen()
+{
+    ?>
+	<script>
+
+jQuery(document).ready(function($) {
+  console.log("itemModelListner")
+
+
+    //Show edit Modal Window
+    var $edit_item = jQuery('.edit-button');
+    var $modal = $('#modal');
+    var $modal_target = $('#modal_target');
+
+    $edit_item.click(function() {
+      var id = $(this).data('id');
+      var title = "Edit Form";
+
+      $.ajax({
+        url: ajaxurl,
+        data: {
+          'action' : 'fetch_edit_item_modal_content',
+          'id' : id,
+          },
+        success:function(data) {
+          $modal_target.html(data);
+          $modal.modal('show');
+        }
+      });
+    });
+  });
+
+  //submit the form
+  function edit_activity_form_submit() {
+      document.getElementById("edit_form").submit();
+    }
+
+  </script>
+  <?php
+}
+
+function fetch_edit_item_modal_content()
+{
+  if (isset($_REQUEST)) {
+    global $wpdb;
+    $id = $_REQUEST['id'];
+    $result = getItemByID($id);
+  ?>
+    <div class="modal-body">
+      <div class="bootstrap-iso">
+        <form id="edit_form" action="" method="post"><!--TODO HERE - tie in action for submit-->
+          <input type="hidden" name="itemID" id="itemID" value="<?php echo $id; ?>">
+          <?
+          updateForm($result);
+          ?>
+          <div>
+            <!--TODO Buttons already in updateForm() but need styled like these -->
+            <button type="button" class="btn btn-lg btn-warning" data-dismiss="modal" style="width:45%;margin-top:1em;margin-left:0.5em">
+            Cancel</button>
+            <!-- <a href='admin.php?page=clip-table%2Fclip-table.php&upt=$row->id'> -->
+            <button class="btn btn-lg btn-success" name="submit" type="submit" style="width:49%;margin-top:1em" onclick="edit_activity_form_submit()">
+            Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <?php
+    //die();
+  }
+}
+    
+add_action('wp_ajax_fetch_edit_item_modal_content', 'fetch_edit_item_modal_content');
+add_action('wp_ajax_nopriv_fetch_edit_item_modal_content', 'fetch_edit_item_modal_content');
+
 function tableHeaders(){
   ?>
   <thead>
@@ -247,28 +364,33 @@ function showAllRecordsAdmin($table_name)
   $table_name = $table_name;
   $result = $wpdb->get_results("SELECT * FROM $table_name");
           
-  foreach ($result as $print) {
+  foreach ($result as $row) {
     echo "
       <tr>
       <!-- ID in TD for item to be put in clipboard -->
-        <td>$print->id</td>
-        <td>$print->Title</td>
-        <td>$print->Description</td>
-        <td id='copyItem-$print->id'>$print->Details</td> 
+        <td>$row->id</td>
+        <td>$row->Title</td>
+        <td>$row->Description</td>
+        <td id='copyItem-$row->id'>$row->Details</td> 
 
         <!--Button Actions -->
 
-        <td width='15%'>
+        <td>
           <!-- UPDATE / Edit calls form -->
-          <a href='admin.php?page=clip-table%2Fclip-table.php&upt=$print->id'>
-            <button class='edit-button btn-lg' data-id='$print->id'><i class='fas fa-pencil-alt'></i></button></a> 
+
+          <!-- Update using Post page refresh -->
+          <a href='admin.php?page=clip-table%2Fclip-table.php&upt=$row->id'>
+          <button class='edit-button btn-sm' data-id='$row->id'><i class='fas fa-pencil-alt'></i></button></a> 
+            
+          <!-- Update using Modal -->
+          <button class='edit-button btn-sm' data-id='$row->id' data-toggle='modal' data-target='#model'><i class='fas fa-pencil-alt'></i></button>
           
           <!-- DELETE -->
-          <a href='admin.php?page=clip-table%2Fclip-table.php&del=$print->id'>
-            <button class='delete-button btn-lg' data-id='$print->id' id='$print->id'><i class='fas fa-trash-alt'></i></button></a>
+          <a href='admin.php?page=clip-table%2Fclip-table.php&del=$row->id'>
+            <button class='delete-button btn-sm' data-id='$row->id' id='$row->id'><i class='fas fa-trash-alt'></i></button></a>
 
           <!-- COPY field to clipboard - listner done by copy.js-->
-          <button class='copyBtn btn-lg'data-id='$print->id' id='$print->id'><i class='far fa-clipboard'></i></button>
+          <button class='copyBtn btn-sm'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
 
         </td>
       </tr>
@@ -283,16 +405,16 @@ function showAllRecords($table_name)
   $table_name = $table_name;
   $result = $wpdb->get_results("SELECT * FROM $table_name");
           
-  foreach ($result as $print) {
+  foreach ($result as $row) {
     echo "
       <tr>
-        <td width='5%'>$print->id</td>
-        <td width='25%'>$print->Title</td>
-        <td width='25%'>$print->Description</td>
-        <td width='25%'id='copyItem-$print->id'>$print->Details</td>
+        <td width='5%'>$row->id</td>
+        <td width='25%'>$row->Title</td>
+        <td width='25%'>$row->Description</td>
+        <td width='25%'id='copyItem-$row->id'>$row->Details</td>
         <td width='15%'>
           <!-- COPY field to clipboard-->
-          <button class='copyBtn btn-lg'data-id='$print->id' id='$print->id'><i class='far fa-clipboard'></i></button>
+          <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
         </td>
       </tr>
     ";
