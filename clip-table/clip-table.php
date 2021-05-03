@@ -89,38 +89,11 @@ function crudAdminPage() {
   global $wpdb;
   $table_name ='cliptable';
 
+  //CRUD based on isset($_GETn..
 
-  //TODO - Move crud actions
-  //INSERT New Entry
-
-  if (isset($_POST['newsubmit'])) {
-    $title = $_POST['newtitle'];
-    $descr = $_POST['newdesc'];
-    $details = $_POST['newdetails'];
-
-    error_log( 'CLIPTABLE PLUGIN  - Insert New Entry ' );
-
-    //SQL- no fallback or confirmation
-    $wpdb->query("INSERT INTO $table_name(Title,Description,Details) VALUES('$title','$descr','$details')");
-    
-    //refresh page - TODO Make Global string
-    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
-  }
-
-  //UPDATE Entry based on POST/GET
+  performInsert();
   performUpdate();
-
-  //DELETE Entry
-
-  if (isset($_GET['del'])) {
-    $del_id = $_GET['del'];
-
-    error_log('CLIPTABLE PLUGIN  - Delete Entry: '+$del_id) ;
-
-    $wpdb->query("DELETE FROM $table_name WHERE id='$del_id'");
-
-    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
-  }
+  performDelete();  
   ?>
 
   <!--- Main Table -->
@@ -156,9 +129,11 @@ function addAdminPageContent() {
 }
 
 function performUpdate(){
-    //UPDATE Entry in DB from POST and reload page
+  //UPDATE Entry in DB from POST and reload page
 
-    //Add OR Request from Modal 
+  //Add OR Request from Modal 
+  global $wpdb;
+  $table_name = "cliptable";
 
   if (isset($_POST['uptsubmit'])) {
     $id = $_POST['uptid'];
@@ -170,6 +145,51 @@ function performUpdate(){
 
     $wpdb->query("UPDATE $table_name SET Title='$title',Description='$desc',Details='$details'  WHERE id='$id'");
     
+    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
+     /* Go Back to URL you came from*/
+      /* This keeps all URL post criteria for filters*/
+      //   if (wp_get_referer()) {
+      //     wp_safe_redirect(wp_get_referer());
+      // } else {
+      //     wp_safe_redirect(get_home_url());
+      // }
+  }
+}
+
+function performInsert()
+{
+  global $wpdb;
+  $table_name = "cliptable";
+  //INSERT New Entry
+
+  if (isset($_POST['newsubmit'])) {
+    $title = $_POST['newtitle'];
+    $descr = $_POST['newdesc'];
+    $details = $_POST['newdetails'];
+
+    error_log( 'CLIPTABLE PLUGIN  - Insert New Entry ' );
+
+    //SQL- no fallback or confirmation
+    $wpdb->query("INSERT INTO $table_name(Title,Description,Details) VALUES('$title','$descr','$details')");
+    
+    //refresh page - TODO Make Global string
+    echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
+  }
+}
+
+function performDelete()
+{
+  if (isset($_GET['del'])) {
+
+    global $wpdb;
+    $table_name = "cliptable";
+  
+    $del_id = $_GET['del'];
+  
+    error_log('CLIPTABLE PLUGIN  - Delete Entry: '+$del_id) ;
+  
+    $wpdb->query("DELETE FROM $table_name WHERE id='$del_id'");
+  
     echo "<script>location.replace('admin.php?page=clip-table%2Fclip-table.php');</script>";
   }
 }
