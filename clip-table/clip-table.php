@@ -38,7 +38,7 @@ function activate_clip_table() {
 	Clip_Table_Activator::activate();
 }
 
-register_activation_hook( __FILE__, 'activate_plugin_name' );
+register_activation_hook( __FILE__, 'activate_clip_table' );
 
 // Set up JS and CSS files
 
