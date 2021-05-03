@@ -40,6 +40,19 @@ function activate_clip_table() {
 
 register_activation_hook( __FILE__, 'activate_clip_table' );
 
+
+/**
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/class-clip-table-deactivator.php
+ */
+function deactivate_clip_table() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-clip-table-deactivator.php';
+	Clip_Table_Deactivator::deactivate();
+}
+
+register_deactivation_hook( __FILE__, 'deactivate_clip_table' );
+
+
 // Set up JS and CSS files
 
 function enqueue_my_scripts() {
