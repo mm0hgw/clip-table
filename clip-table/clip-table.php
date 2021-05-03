@@ -111,13 +111,12 @@ function crudAdminPage() {
     </table>
   </div>
   <!-- UPDATE TABLE -->
-  <!-- If Updating - Show editable row for item -->
+  <!-- If Updating - Show editable row for item (for non Modal) -->
   <?php
   if (isset($_GET['upt'])) {
     updateRecordForm();
   }
   assignItemModal();
-
 }
 
 // Admin Page Creation
@@ -280,6 +279,7 @@ jQuery(document).ready(function($) {
     var $edit_item = jQuery('.edit-button');
     var $modal = $('#modal');
     var $modal_target = $('#modal_target');
+    var $modal_title = $('.modal-title');
 
     $edit_item.click(function() {
       var id = $(this).data('id');
@@ -293,6 +293,8 @@ jQuery(document).ready(function($) {
           },
         success:function(data) {
           $modal_target.html(data);
+          $modal_title.text(title);
+
           $modal.modal('show');
         }
       });
