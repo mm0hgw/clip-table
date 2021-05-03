@@ -1,26 +1,44 @@
 <?php
  
-/*
- 
-Plugin Name: Clip-Table
- 
-Plugin URI: 
- 
-Description: Plugin to show custom table with a field being added to a copy to clipboard button. 
-Admin Page allows create, delete and update and copy. Short Code shows table with copy button.
- 
-Version: 1.0
- 
-Author: Rowan Evenstar
- 
-Author URI: https://www.linkedin.com/in/rowanevenstar/
- 
-License: GPLv2 or later
- 
-Text Domain: cliptable
- 
-*/
+ /**  The plugin bootstrap file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://www.linkedin.com/in/rowanevenstar/
+ * @since             1.0.0
+ * @package           Plugin_Name
+ *
+ * @wordpress-plugin
+ * Plugin Name:       Clip Table
+ * Plugin URI:        https://github.com/mm0hgw/clip-table
+ * Description:       Show table with details field linked to copy to clip-board button. Add, Update, Delete entries.
+ * Version:           1.0.0
+ * Author:            Rowan Evenstar
+ * Author URI:        https://www.linkedin.com/in/rowanevenstar/
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       clip-table
+ * Domain Path:       /languages
+ */
 
+/**
+ * Currently plugin version.
+*/
+define( 'PLUGIN_NAME_VERSION', '1.0.0' );
+
+/**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-clip-table-activator.php
+ */
+function activate_clip_table() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-clip-table-activator.php';
+	Clip_Table_Activator::activate();
+}
+
+register_activation_hook( __FILE__, 'activate_plugin_name' );
 
 // Set up JS and CSS files
 
@@ -52,44 +70,6 @@ function enqueue_my_scripts() {
   );
 }
 add_action('admin_enqueue_scripts', 'enqueue_my_scripts'); 
-
-
-// Create Table in Database on Plugin Activation
-
-register_activation_hook( __FILE__, 'crudOperationsTable');
-
-function crudOperationsTable() {
-  
-    //CREATE TABLE ON ACTIVATION
-    global $wpdb; //The wordpress Database
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php'); //makes dbDelta work
-
-
-    //Table Settings - TABLE NAME
-    $charset_collate = $wpdb->get_charset_collate();
-    //$table_name = $wpdb->prefix . 'cliptable'; //5a_ prefix failed. Not using prefix. //BUG TODO
-    $table_name ='cliptable';
-
-    $sql = "CREATE TABLE ". $table_name." (
-        id int(11) NOT NULL AUTO_INCREMENT,
-        Title varchar(255)  NOT NULL,
-        Description varchar(255)  NOT NULL,
-        Details varchar(255)  NULL,
-        PRIMARY KEY  (id)
-        ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-        ";
-
-    //Output SQL to allow for debuggin
-    error_log( 'CLIPTABLE PLUGIN - Creation SQL ' );
-    error_log( print_r( $sql, true ) );
-  
-    //Run Create Statement, If Table Doesn't exist 
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) 
-     { 
-      dbDelta($sql);
-      error_log( 'CLIPTABLE PLUGIN  - Database Created ' );   
-     }
-}
 
 //Admin Page
 function crudAdminPage() {
