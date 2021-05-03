@@ -91,7 +91,6 @@ function crudOperationsTable() {
      }
 }
 
-
 //Admin Page
 function crudAdminPage() {
   global $wpdb;
