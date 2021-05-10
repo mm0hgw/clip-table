@@ -348,7 +348,7 @@ function tableHeaders(){
   ?>
   <thead>
       <tr>
-        <th class='ct_column-id'>ID</th>
+        <!-- <th class='ct_column-id'>ID</th> -->
         <th class='ct_column-title'>Title</th>
         <th class='ct_column-desc'>Description </th>
         <th class='ct_column-copy'>Details</th>
@@ -363,7 +363,6 @@ function insertNewRecordForm(){
   <!-- Insert New Record - Table Row -->
   <form action="" method="post">
     <tr>
-      <td><input type="text" value="" disabled></td>
       <td><input type="text" id="newtitle" name="newtitle"></td>
       <td><input type="text" id="newdesc" name="newdesc"></td>
       <td><input type="text" id="newdetails" name="newdetails"></td>
@@ -382,8 +381,7 @@ function showAllRecordsAdmin($table_name)
     echo "
       <tr>
       <!-- ID in TD for item to be put in clipboard -->
-        <td>$row->id</td>
-        <td>$row->Title</td>
+        <td>$row->id  -  $row->Title</td>
         <td>$row->Description</td>
         <td id='copyItem-$row->id'>$row->Details</td> 
 
@@ -422,7 +420,7 @@ function showAllRecords($table_name)
   foreach ($result as $row) {
     echo "
       <tr>
-        <td width='5%'>$row->id</td>
+        <!--<td width='5%'>$row->id</td>-->
         <td width='25%'>$row->Title</td>
         <td width='25%'>$row->Description</td>
         <td width='25%'id='copyItem-$row->id'>$row->Details</td>
@@ -431,6 +429,22 @@ function showAllRecords($table_name)
           <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
         </td>
       </tr>
+    ";
+  }
+}
+function showAllRecordItems($table_name)
+{
+  //TABLE WITH ONLY COPY BUTTON
+  global $wpdb;
+  $table_name = $table_name;
+  $result = $wpdb->get_results("SELECT * FROM $table_name");
+          
+  foreach ($result as $row) {
+    echo "
+      <p>$row->Title</p>
+      <p>$row->Description</p>
+        <p id='copyItem-$row->id'>$row->Details</p>
+          <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
     ";
   }
 }
@@ -447,11 +461,12 @@ function cliptable_show_table($atts) {
 
     echo "
       <div class='wrap'>
-        <table class='p-list-table widefat striped' id='mainTable'>";
+        <table class='table widefat table-striped table-dark table-hover' id='mainTable'>";
 
           tableHeaders();
           echo "<tbody>";
           showAllRecords($table_name);
+          showAllRecordItems($table_name);
 
     echo "</tbody></table></div>";
  			
