@@ -73,6 +73,11 @@ function enqueue_my_scripts() {
 
   //wp_enqueue_script('copy_js', plugin_dir_url(__FILE__) . 'js/copy.js'); //standard way to enqueue
 
+  //DataTables
+  wp_enqueue_script('datatables', 'https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js', array('jquery'), false );
+  wp_localize_script( 'datatables', 'datatablesajax', array('url' => admin_url('admin-ajax.php')) );
+  wp_enqueue_style('datatables', 'https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css' );
+  
   //Copy script for Copy to Clipboard Button Loads in footer - for Event listeners. Loads latest file - always runs latest version 
   wp_enqueue_script(
     'copy_js',
@@ -455,7 +460,6 @@ function cliptable_show_table($atts) {
   //Output full table 
   global $wpdb;
   $table_name = "cliptable";
-  $result = $wpdb->get_results("SELECT * FROM $table_name");
  
   ob_start(); //all echo statements put in array 
 
@@ -466,7 +470,6 @@ function cliptable_show_table($atts) {
           tableHeaders();
           echo "<tbody>";
           showAllRecords($table_name);
-          showAllRecordItems($table_name);
 
     echo "</tbody></table></div>";
  			
@@ -478,6 +481,25 @@ function cliptable_show_table($atts) {
 }
 
 add_shortcode('cliptable-show-table', 'cliptable_show_table');
+
+function cliptable_show_cards($atts) {
+
+  //Output full table 
+  global $wpdb;
+  $table_name = "cliptable";
+ 
+  ob_start(); //all echo statements put in array 
+
+    showAllRecordItems($table_name);
+ 			
+  $final_table = ob_get_clean(); //gets all echo values since start
+
+  enqueue_my_scripts();
+ 	
+ 	return $final_table ;
+}
+
+add_shortcode('cliptable-show-cards', 'cliptable_show_cards');
 
 
 
