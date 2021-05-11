@@ -71,6 +71,9 @@ function enqueue_my_scripts() {
   //Admin Stylesheet 
   wp_enqueue_style('admin_css', plugin_dir_url(__FILE__).'admin/css/admin.css');
 
+  //Public CSS
+  wp_enqueue_style('public_css', plugin_dir_url(__FILE__).'public/css/style.css');
+
   //wp_enqueue_script('copy_js', plugin_dir_url(__FILE__) . 'js/copy.js'); //standard way to enqueue
 
   //DataTables
@@ -85,6 +88,12 @@ function enqueue_my_scripts() {
     array('jquery'), // this script depends on jQuery
     filemtime(plugin_dir_url(__FILE__) . 'js/copy.js'), // uses file modified date 
     true // true = in Footer - load after page - e.g. for eventlistners
+  );
+  wp_enqueue_script(
+    'datatables_handlers',
+    plugin_dir_url(__FILE__) . 'js/datatables_handlers.js',
+    array('jquery'), // this script depends on jQuery
+    false // fasle = in Header - load with page - e.g. for datatables
   );
 }
 add_action('admin_enqueue_scripts', 'enqueue_my_scripts'); 
@@ -439,7 +448,7 @@ function showAllRecords($table_name)
 }
 function showAllRecordItems($table_name)
 {
-  //TABLE WITH ONLY COPY BUTTON
+  //CARDS WITH ONLY COPY BUTTON
   global $wpdb;
   $table_name = $table_name;
   $result = $wpdb->get_results("SELECT * FROM $table_name");
@@ -449,12 +458,12 @@ function showAllRecordItems($table_name)
       <p>$row->Title</p>
       <p>$row->Description</p>
         <p id='copyItem-$row->id'>$row->Details</p>
-          <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
+          <p><button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button><p>
     ";
   }
 }
 
-//Short Code 
+//Shortcode for a standard Table -- TODO Column Widths
 function cliptable_show_table($atts) {
 
   //Output full table 
@@ -482,6 +491,7 @@ function cliptable_show_table($atts) {
 
 add_shortcode('cliptable-show-table', 'cliptable_show_table');
 
+//Shortcode for Card Style
 function cliptable_show_cards($atts) {
 
   //Output full table 
@@ -501,5 +511,60 @@ function cliptable_show_cards($atts) {
 
 add_shortcode('cliptable-show-cards', 'cliptable_show_cards');
 
+//Shortcode for Card Style
+function cliptable_show_DT($atts) {
+
+  ob_start(); //all echo statements put in array 
+
+  echo "
+  <div class='wrap'>
+  <table id='main_table' width='100%' class='table widefat table-striped table-dark table-hover' id='mainTable'>
+    <thead>
+    <tr>
+      <!-- <th class='ct_column-id'>ID</th> -->
+      <th class='ct_column-title'>Title</th>
+      <th class='ct_column-desc'>Description </th>
+      <th class='ct_column-copy'>Details</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    </tbody>
+  </table></div>
+  ";
+ 			
+  $final_table = ob_get_clean(); //gets all echo values since start
+
+  enqueue_my_scripts();
+ 	
+ 	return $final_table ;
+}
+
+add_shortcode('cliptable-show-DT', 'cliptable_show_DT');
+
+function my_ajax_getitemsfordatatables(){
+
+  //query
+  global $wpdb;
+  $table_name ='cliptable';
+  $result = $wpdb->get_results("SELECT * FROM $table_name");
+          
+  //create empty array and loop through results, populating array
+  $return_json = array();
+
+  foreach ($result as $row) {
+    console.log('in result loop');
+    $item = array(
+      'title' => $row->Title,
+      'description' => $row->Description,
+      'details' => $row->Details,
+    );
+    $return_json[] = $item;
+  }
+  //return the result to the ajax request and die
+  echo json_encode(array('data' => $return_json));
+  wp_die();
+}
+add_action( 'wp_ajax_getitemsfordatatables', 'my_ajax_getitemsfordatatables' );
+add_action( 'wp_ajax_nopriv_getitemsfordatatables', 'my_ajax_getitemsfordatatables' );
 
 
