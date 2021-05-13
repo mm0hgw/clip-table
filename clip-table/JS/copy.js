@@ -6,11 +6,11 @@ let btns = document.querySelectorAll('.copyBtn');
 //Add Event Listener to each Copy Button (as ran after loading)
 for (button of btns) {
   (function(button) {
-    button.addEventListener('click', function() {      
+    button.addEventListener('click', function() {  
+
+      //Uses the ID set on the button from a static table, not Datatables. 
       var buttonID = button.id;
       copyButton(buttonID); 
-
-      //console.log("Selected Text to Copy: "+element.innerHTML);
 
     });
   })(button);
