@@ -81,20 +81,20 @@ function enqueue_my_scripts() {
   wp_localize_script( 'datatables', 'datatablesajax', array('url' => admin_url('admin-ajax.php')) );
   wp_enqueue_style('datatables', 'https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css' );
   
-  //Copy script for Copy to Clipboard Button Loads in footer - for Event listeners. Loads latest file - always runs latest version 
-  wp_enqueue_script(
-    'copy_js',
-    plugin_dir_url(__FILE__) . 'js/copy.js',
-    array('jquery'), // this script depends on jQuery
-    filemtime(plugin_dir_url(__FILE__) . 'js/copy.js'), // uses file modified date 
-    true // true = in Footer - load after page - e.g. for eventlistners
-  );
   wp_enqueue_script(
     'datatables_handlers',
     plugin_dir_url(__FILE__) . 'js/datatables_handlers.js',
     array('jquery'), // this script depends on jQuery
     false // fasle = in Header - load with page - e.g. for datatables
   );
+    //Copy script for Copy to Clipboard Button Loads in footer - for Event listeners. Loads latest file - always runs latest version 
+    wp_enqueue_script(
+      'copy_js',
+      plugin_dir_url(__FILE__) . 'js/copy.js',
+      array('jquery'), // this script depends on jQuery
+      filemtime(plugin_dir_url(__FILE__) . 'js/copy.js'), // uses file modified date 
+      true // true = in Footer - load after page - e.g. for eventlistners and generated tables
+    );
 }
 add_action('admin_enqueue_scripts', 'enqueue_my_scripts'); 
 
@@ -518,7 +518,7 @@ function cliptable_show_DT($atts) {
 
   echo "
   <div class='wrap'>
-  <table id='main_table' width='100%' class='table widefat table-striped table-dark table-hover' id='mainTable'>
+  <table id='main_table' class='table widefat table-striped table-dark table-hover' id='mainTable'>
     <thead>
     <tr>
       <!-- <th class='ct_column-id'>ID</th> -->
@@ -552,8 +552,8 @@ function my_ajax_getitemsfordatatables(){
   $return_json = array();
 
   foreach ($result as $row) {
-    console.log('in result loop');
     $item = array(
+      // 'id'=> $row->id,
       'title' => $row->Title,
       'description' => $row->Description,
       'details' => $row->Details,
