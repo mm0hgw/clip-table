@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
         columns: [
             // { data: 'id', visible: false},
             { data: 'title' },
-            { data: 'description', width: '30px' },
+            { data: 'description'},
             { data: 'details'},
         //   { data: 'actions' , className: '15px'},
             {
