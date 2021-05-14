@@ -1,4 +1,62 @@
+p{
+    font-weight: 900;
+}
+
 table.dataTable tbody tr
 {
     background-color: #343a40!important; 
 }
+
+#main_table
+{
+    /*Datatables*/
+    width: 100%;
+    table-layout: fixed;
+}
+
+#mainTable
+{
+    table-layout: fixed;
+    width:100%;
+}
+
+.ct_column-actions
+{
+    width: 80px;
+}
+
+.ct_column-title
+{
+    width: 180px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+}
+
+.ct_column-desc
+{
+    width: 180;
+    word-wrap: break-word;
+}
+
+.ct_column-copy
+{
+    width: 100px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+}
+
+.project-card-no-image
+{
+    box-shadow: 0 2px 10px rgba(0,0,0,.075);
+    padding: 20px;
+    border-top: 4px solid #0ea0ff;
+    margin-bottom: 10px;
+}
+
+.px100 {
+    width: 100px;
+    max-width: 100px;
+    word-wrap: break-word;
+  }

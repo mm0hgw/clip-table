@@ -363,10 +363,10 @@ function tableHeaders(){
   <thead>
       <tr>
         <!-- <th class='ct_column-id'>ID</th> -->
+        <th class='ct_column-actions'>Actions</th>
         <th class='ct_column-title'>Title</th>
         <th class='ct_column-desc'>Description </th>
         <th class='ct_column-copy'>Details</th>
-        <th>Actions</th>
       </tr>
     </thead>
   <?
@@ -434,14 +434,15 @@ function showAllRecords($table_name)
   foreach ($result as $row) {
     echo "
       <tr>
-        <!--<td width='5%'>$row->id</td>-->
-        <td width='25%'>$row->Title</td>
-        <td width='25%'>$row->Description</td>
-        <td width='25%'id='copyItem-$row->id'>$row->Details</td>
-        <td width='15%'>
+        <td>
           <!-- COPY field to clipboard-->
-          <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button>
+          <button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'>
+            <i class='far fa-clipboard'></i>
+          </button>
         </td>
+        <td >$row->Title</td>
+        <td >$row->Description</td>
+        <td id='copyItem-$row->id'>$row->Details</td>
       </tr>
     ";
   }
@@ -455,10 +456,17 @@ function showAllRecordItems($table_name)
           
   foreach ($result as $row) {
     echo "
-      <p>$row->Title</p>
-      <p>$row->Description</p>
-        <p id='copyItem-$row->id'>$row->Details</p>
-          <p><button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'><i class='far fa-clipboard'></i></button><p>
+    <div class='project-card-no-image'>
+      <h3><button class='copyBtn btn-lg'data-id='$row->id' id='$row->id'>
+          <i class='far fa-clipboard'></i></button>
+          $row->Title
+        
+      </h3>
+      <h4>$row->Description</h4>
+      <p id='copyItem-$row->id' style='color: var(--gray);word-wrap: break-word;'>
+        $row->Details
+      </p>
+    </div>
     ";
   }
 }
@@ -525,7 +533,7 @@ function cliptable_show_DT($atts) {
       <th class='ct_column-title'>Title</th>
       <th class='ct_column-desc'>Description </th>
       <th class='ct_column-copy'>Details</th>
-      <th>Actions</th>
+      <th class='ct_column-actions'>Actions</th>
     </tr>
     </thead>
     </tbody>
